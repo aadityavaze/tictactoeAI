@@ -33,7 +33,17 @@ def PlayWithAI(humanTag):
         boardState[int(humanNextMoveIndex)]= humanTag
         showBoard(boardState)
         boardState[int(chooseNextMove(AiTag))]=AiTag
+    
+    if finalState(boardState)==humanTag:
+        print("You win")
+    elif finalState(boardState)==AiTag:
+        print("AI wins")
         
+    else:
+        print("Draw")
+    
+    return 
+
 def finalState(boardState):
     
     if (boardState[0]==boardState[1]==boardState[2]=='x') or (boardState[0]==boardState[1]==boardState[2]=='o'):
@@ -121,10 +131,21 @@ def chooseNextMove(AiTag):
 
 pickle_in = open("qValues.pickle","rb")
 Q_table = pickle.load(pickle_in)
-ke='xoo--x--xo'
 
+
+#for key in sorted(Q_table):
+    
+#  showBoard(list(key[1:10]))
+#  print("current player:", key[0])
+#  print("move index", key[10])
+#  print("Q_value", Q_table[key])   
+    
+    
+ke='xo--o----x'
+
+print(len(Q_table))
 for i in range(9):
     if ke+str(i) in Q_table:
         print(str(i),Q_table[ke+str(i)])
         
-PlayWithAI('x')
+PlayWithAI('o')

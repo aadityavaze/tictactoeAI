@@ -28,8 +28,8 @@ import pickle
 
 Q_table=  {}
 
-discount=0.9
-learningRate=0.03
+discount=0.94
+learningRate=0.2
 
 nextMove=0
 boardState=[]
@@ -65,13 +65,25 @@ def chooseRandomMove():
         return -1
     
 
+def determineNextMoveforTraining(currentPlayer):
+    
+    
+    temp= random.randint(0,100)
+        
+    #if temp > (0.9-0.8*len(Q_table)/100000)*100:
 
+    if temp > 30:       
+        return chooseNextMove(currentPlayer)
+    else:
+        return chooseRandomMove()
+            
+        
 
 def initializeQValues():
     
+    newKeyo= 'o---------'
+    newKeyx= 'x---------'
     for move in range (9):
-        newKeyo= 'o---------'
-        newKeyx= 'x---------'
         Q_table[newKeyo+str(move)]= str(random.randint(-15,15)/100)
         Q_table[newKeyx+str(move)]= str(random.randint(-15,15)/100)
         
@@ -80,15 +92,9 @@ def learn(trainingSize):
     currentPlayer= chooseAlternateStartPlayer()
     count = 0
     while(count< trainingSize):
-        showBoard(boardState)
-        switchRandomChoice=0
         
-        if switchRandomChoice<2:
-            switchRandomChoice+=1
-            nextMove= chooseNextMove(currentPlayer)
-        else:
-            switchRandomChoice=0
-            nextMove=chooseRandomMove()
+        showBoard(boardState)
+        nextMove= determineNextMoveforTraining(currentPlayer)
         
         key= currentPlayer + ''.join(boardState) + str(nextMove)
     
@@ -97,18 +103,22 @@ def learn(trainingSize):
         
         tempState=list(boardState)
         tempState[nextMove]=currentPlayer
-        
-        
-        
         gameRes=finalState(tempState)
         
-        if gameRes=='x' or gameRes=='d' or gameRes=='o':
-        
-            key= changePlayer(currentPlayer) + ''.join(tempState) + str(nextMove)
-
-            if key not in Q_table:
-                newKey= currentPlayer + ''.join(tempState)
+        if gameRes=='not over':
+            
+            tableEntryExists=0
+            
+            for i in range(9):
+                ke= changePlayer(currentPlayer) + ''.join(tempState) + str(i)
                 
+                if ke in Q_table:
+                    tableEntryExists=1
+                    break
+            
+            
+            if tableEntryExists==0:
+                newKey= changePlayer(currentPlayer) + ''.join(tempState)
                 r=[]
                 for i in range(9):
                     if tempState[i]=='-':
@@ -120,14 +130,13 @@ def learn(trainingSize):
             updateQTable(currentPlayer, nextMove)
 
             
-        gameResult=finalState(boardState)
+        gameResult=finalState(tempState)
         print(gameResult)
         
         if gameResult=='x' or gameResult=='d' or gameResult=='o':
             initializeBoard()
             count+=1
         else:
-            
             boardState[nextMove]=currentPlayer
             currentPlayer=changePlayer(currentPlayer)
             
@@ -135,17 +144,13 @@ def learn(trainingSize):
 
 def updateQTable(player, nextMove):
     
-    gameResult=finalState(boardState)
-    if gameResult=='x' or gameResult=='d' or gameResult=='o':
-        expected = returnReward(gameResult, boardState)
-    else:
-        tempState=list(boardState)
-        tempState[nextMove]=player
+    tempState=list(boardState)
+    tempState[nextMove]=player
         
-        if player=='x':
-            expected = float(returnReward(finalState(tempState), tempState) + (discount * minQ(player, nextMove)))
-        else:
-            expected = float(returnReward(finalState(tempState), tempState) + (discount * maxQ(player, nextMove)))
+    if player=='x':
+        expected = float(returnReward(finalState(tempState), tempState) + (discount * minQ(player, nextMove)))
+    else:
+        expected = float(returnReward(finalState(tempState), tempState) + (discount * maxQ(player, nextMove)))
         
     change = learningRate * (expected - float(Q_table[player + ''.join(boardState)+ str(nextMove)]))
             
@@ -184,6 +189,16 @@ def maxQ(currentPlayer, move):
     
     tempState=list(boardState)
     tempState[move]=currentPlayer
+    
+    lastMove=1
+    for i in range(9):
+        if tempState[i]=='-':
+            lastMove=0
+            break
+    
+    if lastMove==1:
+        return 0
+    
     key= changePlayer(currentPlayer) + ''.join(tempState)
     
     
@@ -193,11 +208,10 @@ def maxQ(currentPlayer, move):
         
         if key+str(i) in Q_table:
             
-            if tempMax>float(Q_table[key + str(i)]):
+            if tempMax<float(Q_table[key + str(i)]):
                 tempMax=float(Q_table[key + str(i)])
          
     return tempMax
-           
     
 def finalState(boardState):
     
@@ -314,7 +328,7 @@ def chooseNextMove(AiTag):
 initializeBoard()
 initializeQValues()
 
-learn(20000)
+learn(50000)
 
 pickle_out = open("qValues.pickle","wb")
 pickle.dump(Q_table, pickle_out)
