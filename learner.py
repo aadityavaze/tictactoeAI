@@ -72,7 +72,7 @@ def determineNextMoveforTraining(currentPlayer):
         
     #if temp > (0.9-0.8*len(Q_table)/100000)*100:
 
-    if temp > 80:
+    if temp > 85:
         return chooseNextMove(currentPlayer)
     else:
         return chooseRandomMove()
@@ -315,7 +315,7 @@ def chooseNextMove(AiTag):
 initializeBoard()
 initializeQValues()
 
-learn(100000)
+learn(200000)
 
 #Store the learned Q values in a file
 pickle_out = open("qValues.pickle","wb")
