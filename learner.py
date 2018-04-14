@@ -1,5 +1,5 @@
 import random
-
+import pickle
 
 #Representations used
 #x represents X on board
@@ -29,7 +29,7 @@ import random
 Q_table=  {}
 
 discount=0.9
-learningRate=0.1
+learningRate=0.03
 
 nextMove=0
 boardState=[]
@@ -97,21 +97,24 @@ def learn(trainingSize):
         tempState=list(boardState)
         tempState[nextMove]=currentPlayer
         
-        boolGameOver= 1
-        for i in range(9):
-            if tempState[i]=='-':
-                boolGameOver=0
-                break
         
-        if not boolGameOver:
+        
+        gameRes=finalState(tempState)
+        
+        if gameRes=='x' or gameRes=='d' or gameRes=='o':
         
             key= changePlayer(currentPlayer) + ''.join(tempState) + str(nextMove)
 
             if key not in Q_table:
                 newKey= currentPlayer + ''.join(tempState)
                 
-                for move in range (9):
-                    Q_table[newKey+ str(move)]= random.randint(-15,15)/100
+                r=[]
+                for i in range(9):
+                    if tempState[i]=='-':
+                        r.append(i)
+                        
+                for move in range (len(r)):
+                    Q_table[newKey+ str(r[move])]= random.randint(-5,5)/100
         
             updateQTable(currentPlayer, nextMove)
 
@@ -205,6 +208,15 @@ def finalState(boardState):
     
     if (boardState[6]==boardState[7]==boardState[8]=='x') or (boardState[6]==boardState[7]==boardState[8]=='o'):
         return boardState[6]
+    
+    if (boardState[0]==boardState[3]==boardState[6]=='x') or (boardState[0]==boardState[3]==boardState[6]=='o'):
+        return boardState[0]
+        
+    if (boardState[1]==boardState[4]==boardState[7]=='x') or (boardState[1]==boardState[4]==boardState[7]=='o'):
+        return boardState[1]
+    
+    if (boardState[2]==boardState[5]==boardState[8]=='x') or (boardState[2]==boardState[5]==boardState[8]=='o'):
+        return boardState[2]
     
     if (boardState[0]==boardState[4]==boardState[8]=='x') or (boardState[0]==boardState[4]==boardState[8]=='o'):
         return boardState[0]
@@ -302,12 +314,16 @@ def chooseNextMove(AiTag):
 initializeBoard()
 initializeQValues()
 
-learn(300000)
+learn(40000)
+
+pickle_out = open("qValues.pickle","wb")
+pickle.dump(Q_table, pickle_out)
+pickle_out.close()
 
 for key in Q_table:
     showBoard(list(key[1:10]))
     print("current player:", key[0])
     print("move index", key[10])
-    print("Q_value", Q_table[key])
+    print("Q_value", Q_table[key])   
     
-PlayWithAI('x')
+
