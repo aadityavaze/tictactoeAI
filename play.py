@@ -121,4 +121,10 @@ def chooseNextMove(AiTag):
 
 pickle_in = open("qValues.pickle","rb")
 Q_table = pickle.load(pickle_in)
+ke='xoo--x--xo'
+
+for i in range(9):
+    if ke+str(i) in Q_table:
+        print(str(i),Q_table[ke+str(i)])
+        
 PlayWithAI('x')

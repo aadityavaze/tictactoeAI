@@ -83,10 +83,11 @@ def learn(trainingSize):
         showBoard(boardState)
         switchRandomChoice=0
         
-        if switchRandomChoice==0:
-            switchRandomChoice=1
+        if switchRandomChoice<2:
+            switchRandomChoice+=1
             nextMove= chooseNextMove(currentPlayer)
         else:
+            switchRandomChoice=0
             nextMove=chooseRandomMove()
         
         key= currentPlayer + ''.join(boardState) + str(nextMove)
@@ -114,7 +115,7 @@ def learn(trainingSize):
                         r.append(i)
                         
                 for move in range (len(r)):
-                    Q_table[newKey+ str(r[move])]= random.randint(-5,5)/100
+                    Q_table[newKey+ str(r[move])]= random.randint(-15,15)/100
         
             updateQTable(currentPlayer, nextMove)
 
@@ -266,7 +267,6 @@ def PlayWithAI(humanTag):
         showBoard(boardState)
         humanNextMoveIndex= input()
         boardState[int(humanNextMoveIndex)]= humanTag
-        showBoard(boardState)
         boardState[int(chooseNextMove(AiTag))]=AiTag
             
 def chooseNextMove(AiTag):
@@ -314,16 +314,16 @@ def chooseNextMove(AiTag):
 initializeBoard()
 initializeQValues()
 
-learn(40000)
+learn(20000)
 
 pickle_out = open("qValues.pickle","wb")
 pickle.dump(Q_table, pickle_out)
 pickle_out.close()
 
-for key in Q_table:
-    showBoard(list(key[1:10]))
-    print("current player:", key[0])
-    print("move index", key[10])
-    print("Q_value", Q_table[key])   
+#for key in Q_table:
+    #showBoard(list(key[1:10]))
+    #print("current player:", key[0])
+    #print("move index", key[10])
+    #print("Q_value", Q_table[key])   
     
 
