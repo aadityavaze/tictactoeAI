@@ -80,8 +80,15 @@ def learn(trainingSize):
     currentPlayer= chooseAlternateStartPlayer()
     count = 0
     while(count< trainingSize):
-        showBoard()
-        nextMove= chooseNextMove(currentPlayer)
+        showBoard(boardState)
+        switchRandomChoice=0
+        
+        if switchRandomChoice==0:
+            switchRandomChoice=1
+            nextMove= chooseNextMove(currentPlayer)
+        else:
+            nextMove=chooseRandomMove()
+        
         key= currentPlayer + ''.join(boardState) + str(nextMove)
     
         if key not in Q_table:
@@ -160,7 +167,7 @@ def minQ(currentPlayer, move):
     
     for i in range(9):
         
-        tempMin=1000
+        tempMin=10000
         
         if key+str(i) in Q_table:
             
@@ -178,7 +185,7 @@ def maxQ(currentPlayer, move):
     
     for i in range(9):
         
-        tempMax=-1000
+        tempMax=-10000
         
         if key+str(i) in Q_table:
             
@@ -229,7 +236,7 @@ def changePlayer(player):
     else:
         return 'o'
     
-def showBoard():
+def showBoard(boardState):
     print('\n')
     print(boardState[0]+boardState[1]+boardState[2])
     print(boardState[3]+boardState[4]+boardState[5])
@@ -244,15 +251,12 @@ def PlayWithAI(humanTag):
         AiTag='x'
         
     while finalState(boardState)=='not over':
-        showBoard()
+        showBoard(boardState)
         humanNextMoveIndex= input()
         boardState[int(humanNextMoveIndex)]= humanTag
-        showBoard()
-        temp=int(chooseNextMove(AiTag))
-        if temp!=-1:
-            boardState[temp]=AiTag
-        else:
-            print("no such move learned yet.")
+        showBoard(boardState)
+        boardState[int(chooseNextMove(AiTag))]=AiTag
+            
 def chooseNextMove(AiTag):
     
     if AiTag=='o':
@@ -272,6 +276,7 @@ def chooseNextMove(AiTag):
             return index
         
         else:
+            print("random move chosen.")
             return chooseRandomMove()
     
     if AiTag=='x':
@@ -297,6 +302,12 @@ def chooseNextMove(AiTag):
 initializeBoard()
 initializeQValues()
 
-learn(50000)
-print(len(Q_table))
+learn(300000)
+
+for key in Q_table:
+    showBoard(list(key[1:10]))
+    print("current player:", key[0])
+    print("move index", key[10])
+    print("Q_value", Q_table[key])
+    
 PlayWithAI('x')
