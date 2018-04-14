@@ -24,10 +24,10 @@ import random
 possibleStates=9+9*8+9*8*7/2+9*8*7*6/4+9*8*7*6*5/12+9*8*7*6*5*4/36+9*8*7*6*5*4*3/144+9*8*7*6*5*4*3*2/(24*24)+9*8*7*6*5*4*3*2*1/(24*120)
 
 
-Q_table= dict()
+Q_table=  {}
 
-
-
+discount=0.9
+learningRate=0.1
 currentPlayer = 'O'
 
 
@@ -39,27 +39,56 @@ def initializeBoard():
     for i in range (9):                               
         boardState.append('-')
     
-    for i in range (9):
-        newKey= currentPlayer + ''.join(boardState) + i
-        Q_table[newKey]= 0
+    for move in range (9):
+        newKey= currentPlayer + ''.join(boardState)
+        Q_table[newKey, move]= random.randint(-100,100)/100
+    
+    return
+
+
+def learn(trainingSize):
+    
+    currentState= startState
+    
+    for i in range(trainingSize):
+        
+    key= currentPlayer + ''.join(boardState) 
+    
+    if 
    
+
+
+
 
     
 def Play(currentPlayer):
     
     
-    if finalState()=='o' or finalState()=='x' or finalState()=='d':
-        return 
+    if finalState()=='o':
+        print("O Wins!")
+        return
+        
+    if finalState()=='x':
+        print("X Wins!")
+        return
     
+    if finalState()=='d':
+        print("Game Draw")
+        return
+    
+    #Choosing next move
     nextMoveIndex= getNextStrategy(currentPlayer)
     
+    #Updating the board
     if currentPlayer=='O':
         boardState[nextMoveIndex]='o'
     else:
         boardState[nextMoveIndex]='x'
    
+    #Switching Player
     currentPlayer= changePlayer()
     
+    #Recursive call 
     Play(currentPlayer)
     
     
@@ -87,10 +116,67 @@ def finalState():
         return 'd'
     
     
+def minQ():
+    
+    for i in range(9):
+        
+        tempMin=1000
+        
+        if currentPlayer + ''.join(boardState) + i in Q_table:
+            
+            if tempMin>Q_table[currentPlayer + ''.join(boardState) + i]
+            tempMin=Q_table[currentPlayer + ''.join(boardState) + i]
+         
+        return tempMin
+            
+def maxQ():
+    
+    for i in range(9):
+        
+        tempMax=-1000
+        
+        if currentPlayer + ''.join(boardState) + i in Q_table:
+            
+            if tempMax<Q_table[currentPlayer + ''.join(boardState) + i]
+            
+                tempMin=Q_table[currentPlayer + ''.join(boardState) + i]
+         
+        return tempMin
+
+def returnReward():
+    
+    if finalState()=='x':
+        
+        return 1
+    
+    if finalState()=='o':
+        
+        return -1
+    if finalState()=='not over':
+        
+        return 0
+    
 def getNextStrategy(currentPlayer):
     
+    if currentPlayer=='O':
+        
+        
     return
     
+def updateQValues(currentPlayer):
+    if finalState()=='game over':
+        expected = returnReward()
+    else:
+        
+        if currentPlayer=='X':
+            expected = returnReward() + (discount * lowestQvalue(nextKey))
+     else
+        expected = reward + (discount * highestQvalue(nextKey))
+  change = learningRate * (expected - table[stateKey][action])
+  table[stateKey][action] += change
+    
+    
+
     
 def changePlayer(currentPlayer):
     if currentPlayer=='O':
@@ -109,10 +195,8 @@ def chooseNextMove(currentPlayer, currentBoardState):
         #Minimize Q-value
         
     
-#for i in range(1000):
-    
-  #  initializeBoard()
-    
-  # Play(currentPlayer)
-print(possibleStates)
+for i in range(1000):
+    initializeBoard()
+    Play(currentPlayer)
+
     
