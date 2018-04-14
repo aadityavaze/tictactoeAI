@@ -17,7 +17,7 @@ import random
 
 # the current player is denoted by 'O' or 'X'
 # so the above state is represented as appended string denoting player and the board state
-#Eg. 'Ooxooxx---' represents a state mentioned above with O's turn to play
+#Eg. 'ooxooxx---' represents a state mentioned above with O's turn to play
 
 #State appended to an action(index denoting next move) is mapped to expected rewards and stored in Q_table
 
@@ -28,8 +28,8 @@ Q_table=  {}
 
 discount=0.9
 learningRate=0.1
-currentPlayer = 'O'
-
+currentPlayer = 'o'
+nextMove=9
 
 boardState=[]
 
@@ -41,7 +41,7 @@ def initializeBoard():
     
     for move in range (9):
         newKey= currentPlayer + ''.join(boardState)
-        Q_table[newKey, move]= random.randint(-100,100)/100
+        Q_table[newKey+ move]= random.randint(-100,100)/100
     
     return
 
@@ -52,9 +52,11 @@ def learn(trainingSize):
     
     for i in range(trainingSize):
         
-    key= currentPlayer + ''.join(boardState) 
+        key= currentPlayer + ''.join(boardState) 
     
-    if 
+        if key not in Q_table:
+            
+            Q_table[key+ move]= random.randint(-100,100)/100
    
 
 
@@ -80,7 +82,7 @@ def Play(currentPlayer):
     nextMoveIndex= getNextStrategy(currentPlayer)
     
     #Updating the board
-    if currentPlayer=='O':
+    if currentPlayer=='o':
         boardState[nextMoveIndex]='o'
     else:
         boardState[nextMoveIndex]='x'
@@ -116,52 +118,56 @@ def finalState():
         return 'd'
     
     
-def minQ():
+def minQ(move):
+    
+    temp = Q_table[currentPlayer + ''.join(boardState) + move]
+    
+    temp[move-1]=currentPlayer
+    
+    temp1=temp[:temp.length-1]
     
     for i in range(9):
         
         tempMin=1000
         
-        if currentPlayer + ''.join(boardState) + i in Q_table:
+        if temp1 + i in Q_table:
             
-            if tempMin>Q_table[currentPlayer + ''.join(boardState) + i]
-            tempMin=Q_table[currentPlayer + ''.join(boardState) + i]
+            if tempMin>Q_table[temp1 + i]
+            tempMin=Q_table[temp1 + i]
          
         return tempMin
             
-def maxQ():
+def minQ(move):
+    
+    temp = Q_table[currentPlayer + ''.join(boardState) + move]
+    
+    temp[move-1]=currentPlayer
+    
+    temp1=temp[:temp.length-1]
     
     for i in range(9):
         
         tempMax=-1000
         
-        if currentPlayer + ''.join(boardState) + i in Q_table:
+        if temp1 + i in Q_table:
             
-            if tempMax<Q_table[currentPlayer + ''.join(boardState) + i]
-            
-                tempMin=Q_table[currentPlayer + ''.join(boardState) + i]
+            if tempMax>Q_table[temp1 + i]
+            tempMax=Q_table[temp1 + i]
          
-        return tempMin
+        return tempMax
 
 def returnReward():
     
     if finalState()=='x':
-        
         return 1
-    
     if finalState()=='o':
-        
         return -1
     if finalState()=='not over':
-        
         return 0
     
 def getNextStrategy(currentPlayer):
-    
     if currentPlayer=='O':
-        
-        
-    return
+        return
     
 def updateQValues(currentPlayer):
     if finalState()=='game over':
@@ -169,11 +175,12 @@ def updateQValues(currentPlayer):
     else:
         
         if currentPlayer=='X':
-            expected = returnReward() + (discount * lowestQvalue(nextKey))
-     else
-        expected = reward + (discount * highestQvalue(nextKey))
-  change = learningRate * (expected - table[stateKey][action])
-  table[stateKey][action] += change
+            expected = returnReward() + (discount * minQ(nextMove))
+        else
+            expected = reward + (discount * maxQ(nextMove))
+            change = learningRate * (expected - Q_table[currentPlayer + ''.join(boardState)+ nextMove])
+            
+    Q_table[currentPlayer + ''.join(boardState)+nextMove] += change
     
     
 
