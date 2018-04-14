@@ -28,8 +28,8 @@ import pickle
 
 Q_table=  {}
 
-discount=0.94
-learningRate=0.2
+discount=0.97
+learningRate=0.1
 
 nextMove=0
 boardState=[]
@@ -72,7 +72,7 @@ def determineNextMoveforTraining(currentPlayer):
         
     #if temp > (0.9-0.8*len(Q_table)/100000)*100:
 
-    if temp > 30:       
+    if temp > 80:
         return chooseNextMove(currentPlayer)
     else:
         return chooseRandomMove()
@@ -96,10 +96,10 @@ def learn(trainingSize):
         showBoard(boardState)
         nextMove= determineNextMoveforTraining(currentPlayer)
         
-        key= currentPlayer + ''.join(boardState) + str(nextMove)
+        ke= currentPlayer + ''.join(boardState) + str(nextMove)
     
-        if key not in Q_table:
-            Q_table[key]= random.randint(-15,15)/100
+        if ke not in Q_table:
+            Q_table[ke]= random.randint(-15,15)/100
         
         tempState=list(boardState)
         tempState[nextMove]=currentPlayer
@@ -148,9 +148,9 @@ def updateQTable(player, nextMove):
     tempState[nextMove]=player
         
     if player=='x':
-        expected = float(returnReward(finalState(tempState), tempState) + (discount * minQ(player, nextMove)))
+        expected = float(returnReward(finalState(tempState)) + (discount * minQ(player, nextMove)))
     else:
-        expected = float(returnReward(finalState(tempState), tempState) + (discount * maxQ(player, nextMove)))
+        expected = float(returnReward(finalState(tempState)) + (discount * maxQ(player, nextMove)))
         
     change = learningRate * (expected - float(Q_table[player + ''.join(boardState)+ str(nextMove)]))
             
@@ -173,14 +173,13 @@ def minQ(currentPlayer, move):
     
     key= changePlayer(currentPlayer) + ''.join(tempState)
     
-    
+    tempMin=10000
     for i in range(9):
-        
-        tempMin=10000
         
         if key+str(i) in Q_table:
             
             if tempMin>float(Q_table[key + str(i)]):
+                
                 tempMin=float(Q_table[key + str(i)])
          
     return tempMin
@@ -201,10 +200,9 @@ def maxQ(currentPlayer, move):
     
     key= changePlayer(currentPlayer) + ''.join(tempState)
     
+    tempMax=-10000
     
     for i in range(9):
-        
-        tempMax=-10000
         
         if key+str(i) in Q_table:
             
@@ -247,13 +245,13 @@ def finalState(boardState):
     
     
 
-def returnReward(gameResult, boardState):
+def returnReward(gameResult):
     
     if gameResult=='x':
         return float(1.0)
     if gameResult=='o':
         return float(-1.0)
-    if gameResult=='not over' or finalState(boardState)=='d':
+    if gameResult=='not over' or gameResult=='d':
         return float(0.0)
 
     
@@ -270,32 +268,21 @@ def showBoard(boardState):
     print(boardState[6]+boardState[7]+boardState[8])
     return 
 
-def PlayWithAI(humanTag):
-    initializeBoard()
-    if humanTag=='x':
-        AiTag='o'
-    else:
-        AiTag='x'
-        
-    while finalState(boardState)=='not over':
-        showBoard(boardState)
-        humanNextMoveIndex= input()
-        boardState[int(humanNextMoveIndex)]= humanTag
-        boardState[int(chooseNextMove(AiTag))]=AiTag
-            
 def chooseNextMove(AiTag):
     
     if AiTag=='o':
         
         key = AiTag + ''.join(boardState)
         
+        tempMin=10000
+        index=-1
         for i in range(9):
 
-            tempMin=10000
-            index=-1
+            
             if key+str(i) in Q_table:
 
                 if tempMin>float(Q_table[key + str(i)]):
+                    tempMin=float(Q_table[key + str(i)])
                     index=i
         
         if index!=-1:
@@ -309,13 +296,13 @@ def chooseNextMove(AiTag):
         
         key = AiTag + ''.join(boardState)
         
+        tempMax=-10000
+        index=-1
+        
         for i in range(9):
-
-            tempMax=-10000
-            index=-1
             if key+str(i) in Q_table:
-
                 if tempMax<float(Q_table[key + str(i)]):
+                    tempMax=float(Q_table[key + str(i)])
                     index=i
                     
         if index!=-1:
@@ -328,8 +315,9 @@ def chooseNextMove(AiTag):
 initializeBoard()
 initializeQValues()
 
-learn(50000)
+learn(100000)
 
+#Store the learned Q values in a file
 pickle_out = open("qValues.pickle","wb")
 pickle.dump(Q_table, pickle_out)
 pickle_out.close()
