@@ -1,5 +1,7 @@
 import random
 
+
+#Representations used
 #x represents X on board
 #o represents O on board
 #- represents Blank space on board
@@ -16,10 +18,12 @@ import random
 # ---
 
 # the current player is denoted by 'o' or 'x'
-# so the above state is represented as appended string denoting player and the board state
+# so the above state is represented as appended string player + board state
 #Eg. 'ooxooxx---' represents a state mentioned above with o's turn to play
 
 #State appended to an action(index denoting next move) is mapped to expected rewards and stored in Q_table
+#Eg. 'ooxooxx---7' represents a state mentioned above with o's turn to play and a move to play at index 7
+
 
 
 Q_table=  {}
@@ -77,7 +81,7 @@ def learn(trainingSize):
     count = 0
     while(count< trainingSize):
         showBoard()
-        nextMove= chooseRandomMove()
+        nextMove= chooseNextMove(currentPlayer)
         key= currentPlayer + ''.join(boardState) + str(nextMove)
     
         if key not in Q_table:
@@ -156,7 +160,7 @@ def minQ(currentPlayer, move):
     
     for i in range(9):
         
-        tempMin=10
+        tempMin=1000
         
         if key+str(i) in Q_table:
             
@@ -174,7 +178,7 @@ def maxQ(currentPlayer, move):
     
     for i in range(9):
         
-        tempMax=-10
+        tempMax=-1000
         
         if key+str(i) in Q_table:
             
@@ -232,10 +236,67 @@ def showBoard():
     print(boardState[6]+boardState[7]+boardState[8])
     return 
 
+def PlayWithAI(humanTag):
+    initializeBoard()
+    if humanTag=='x':
+        AiTag='o'
+    else:
+        AiTag='x'
+        
+    while finalState(boardState)=='not over':
+        showBoard()
+        humanNextMoveIndex= input()
+        boardState[int(humanNextMoveIndex)]= humanTag
+        showBoard()
+        temp=int(chooseNextMove(AiTag))
+        if temp!=-1:
+            boardState[temp]=AiTag
+        else:
+            print("no such move learned yet.")
+def chooseNextMove(AiTag):
+    
+    if AiTag=='o':
+        
+        key = AiTag + ''.join(boardState)
+        
+        for i in range(9):
+
+            tempMin=10000
+            index=-1
+            if key+str(i) in Q_table:
+
+                if tempMin>float(Q_table[key + str(i)]):
+                    index=i
+        
+        if index!=-1:
+            return index
+        
+        else:
+            return chooseRandomMove()
+    
+    if AiTag=='x':
+        
+        key = AiTag + ''.join(boardState)
+        
+        for i in range(9):
+
+            tempMax=-10000
+            index=-1
+            if key+str(i) in Q_table:
+
+                if tempMax<float(Q_table[key + str(i)]):
+                    index=i
+                    
+        if index!=-1:
+            return index
+        
+        else:
+            return chooseRandomMove()
+        
 
 initializeBoard()
 initializeQValues()
 
-learn(100000)
-print(Q_table)
-    
+learn(50000)
+print(len(Q_table))
+PlayWithAI('x')
