@@ -34,8 +34,12 @@ boardState=[]
 
 
 def chooseRandomMove():
-    r=random.randint(0,8)
-    return r
+    r=[]
+    for i in range(9):
+        if boardState[i]!='-':
+            r.append(i)
+    
+    return r[random.randint(0,r.length()-1)]
     
 
 def initializeBoard():
@@ -66,7 +70,7 @@ def learn(trainingSize):
                 Q_table[newKey+ nextMove]= random.randint(-15,15)/100
         
         tempState=boardState
-        tempState[move]=currentPlayer
+        tempState[nextMove]=currentPlayer
         key= changePlayer(currentPlayer) + ''.join(tempState) + nextMove
     
         if key not in Q_table:
@@ -84,8 +88,10 @@ def learn(trainingSize):
             initializeBoard()
             count++
         else:
+            print("Board State:", boardState)
+            boardState[nextMove]=currentPlayer
+            currentPlayer=changePlayer(currentPlayer)
             
-            changePlayer(currentPlayer)
         
 
 def updateQTable(currentPlayer, nextMove):
@@ -234,6 +240,6 @@ def chooseNextMove(currentPlayer, currentBoardState):
     
 
 initializeBoard()
-learn(1000)
+learn(100)
 
     
