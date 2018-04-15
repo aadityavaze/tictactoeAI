@@ -6,7 +6,6 @@ import pickle
 #o represents O on board
 #- represents Blank space on board
 
-
 # the key/state in dictionary is shown as indexed
 
 # 012
@@ -20,7 +19,6 @@ import pickle
 # the current player is denoted by 'o' or 'x'
 # so the above state is represented as appended string player + board state
 #Eg. 'ooxooxx---' represents a state mentioned above with o's turn to play
-
 #State appended to an action(index denoting next move) is mapped to expected rewards and stored in Q_table
 #Eg. 'ooxooxx---7' represents a state mentioned above with o's turn to play and a move to play at index 7
 
@@ -28,8 +26,8 @@ import pickle
 
 Q_table=  {}
 
-discount=0.97
-learningRate=0.1
+gamma=0.97
+learningRate=0.35
 
 nextMove=0
 boardState=[]
@@ -70,9 +68,8 @@ def determineNextMoveforTraining(currentPlayer):
     
     temp= random.randint(0,100)
         
-    #if temp > (0.9-0.8*len(Q_table)/100000)*100:
+    if temp > (0.9-(0.8*len(Q_table)/40000))*100:
 
-    if temp > 85:
         return chooseNextMove(currentPlayer)
     else:
         return chooseRandomMove()
@@ -84,8 +81,8 @@ def initializeQValues():
     newKeyo= 'o---------'
     newKeyx= 'x---------'
     for move in range (9):
-        Q_table[newKeyo+str(move)]= str(random.randint(-15,15)/100)
-        Q_table[newKeyx+str(move)]= str(random.randint(-15,15)/100)
+        Q_table[newKeyo+str(move)]= str(random.randint(-10,10)/100)
+        Q_table[newKeyx+str(move)]= str(random.randint(-10,10)/100)
         
 def learn(trainingSize):
     
@@ -99,7 +96,7 @@ def learn(trainingSize):
         ke= currentPlayer + ''.join(boardState) + str(nextMove)
     
         if ke not in Q_table:
-            Q_table[ke]= random.randint(-15,15)/100
+            Q_table[ke]= random.randint(-10,10)/100
         
         tempState=list(boardState)
         tempState[nextMove]=currentPlayer
@@ -125,7 +122,7 @@ def learn(trainingSize):
                         r.append(i)
                         
                 for move in range (len(r)):
-                    Q_table[newKey+ str(r[move])]= random.randint(-15,15)/100
+                    Q_table[newKey+ str(r[move])]= random.randint(-10,10)/100
         
             updateQTable(currentPlayer, nextMove)
 
@@ -148,9 +145,9 @@ def updateQTable(player, nextMove):
     tempState[nextMove]=player
         
     if player=='x':
-        expected = float(returnReward(finalState(tempState)) + (discount * minQ(player, nextMove)))
+        expected = float(returnReward(finalState(tempState)) + (gamma * minQ(player, nextMove)))
     else:
-        expected = float(returnReward(finalState(tempState)) + (discount * maxQ(player, nextMove)))
+        expected = float(returnReward(finalState(tempState)) + (gamma * maxQ(player, nextMove)))
         
     change = learningRate * (expected - float(Q_table[player + ''.join(boardState)+ str(nextMove)]))
             
@@ -248,9 +245,9 @@ def finalState(boardState):
 def returnReward(gameResult):
     
     if gameResult=='x':
-        return float(1.0)
+        return float(2.0)
     if gameResult=='o':
-        return float(-1.0)
+        return float(-2.0)
     if gameResult=='not over' or gameResult=='d':
         return float(0.0)
 
@@ -315,7 +312,7 @@ def chooseNextMove(AiTag):
 initializeBoard()
 initializeQValues()
 
-learn(200000)
+learn(300000)
 
 #Store the learned Q values in a file
 pickle_out = open("qValues.pickle","wb")
