@@ -36,9 +36,9 @@ def PlayWithAICompStarts(humanTag):
         AiTag='x'
         
     while finalState(boardState)=='not over':
-        showBoard(boardState)
         
-         boardState[int(chooseNextMove(AiTag))]=AiTag
+        
+        boardState[int(chooseNextMove(AiTag))]=AiTag
     
         if finalState(boardState)==humanTag:
             print("You win")
@@ -49,8 +49,18 @@ def PlayWithAICompStarts(humanTag):
         elif finalState(boardState)=='d':
             print("Draw")
             break
+        showBoard(boardState)
             
-        humanNextMoveIndex= input()
+        validInput=0
+        while validInput==0:
+            humanNextMoveIndex= input()
+            if(boardState[int(humanNextMoveIndex)]!='-'):
+                print('invalid move.')
+            else:
+                validInput=1
+                
+        
+            
         boardState[int(humanNextMoveIndex)]= humanTag
         
         if finalState(boardState)==humanTag:
@@ -73,7 +83,14 @@ def PlayWithAI(humanTag):
         
     while finalState(boardState)=='not over':
         showBoard(boardState)
-        humanNextMoveIndex= input()
+        
+        validInput=0
+        while validInput==0:
+            humanNextMoveIndex= input()
+            if(boardState[int(humanNextMoveIndex)]!='-'):
+                print('invalid move.')
+            else:
+                validInput=1
         boardState[int(humanNextMoveIndex)]= humanTag
         
         if finalState(boardState)==humanTag:
@@ -186,7 +203,7 @@ def chooseNextMove(AiTag):
             return chooseRandomMove()
         
 
-pickle_in = open("qValuesAdv.pickle","rb")
+pickle_in = open("qValues.pickle","rb")
 Q_table = pickle.load(pickle_in)
 
 
@@ -198,12 +215,12 @@ Q_table = pickle.load(pickle_in)
 #  print("Q_value", Q_table[key])   
     
     
-ke='xoox-xoo-x'
+#ke='x--x-oo-ox'
 
-print(len(Q_table))
-for i in range(9):
-    if ke+str(i) in Q_table:
-        print(str(i),Q_table[ke+str(i)])
+#print(len(Q_table))
+#for i in range(9):
+    #if ke+str(i) in Q_table:
+        #print(str(i),Q_table[ke+str(i)])
         
 print("Enter 'y' if you want to be the first player and 'n' otherwise")
 temp=input()

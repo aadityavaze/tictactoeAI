@@ -1,6 +1,3 @@
-import random
-import pickle
-
 #Representations used
 #x represents X on board
 #o represents O on board
@@ -23,12 +20,16 @@ import pickle
 #Eg. 'ooxooxx---7' represents a state mentioned above with o's turn to play and a move to play at index 7
 
 
-training=400000
+import random
+import pickle
+
+#noOfGames played for training the AI
+training=500000
 
 Q_table=  {}
 
 gamma=0.9
-learningRate=0.2
+learningRate=0.4
 
 nextMove=0
 boardState=[]
@@ -53,31 +54,7 @@ def chooseAlternateStartPlayer():
         p=0
         return 'o'
 
-def chooseRandomMove():
-    r=[]
-    for i in range(9):
-        if boardState[i]=='-':
-            r.append(i)
-    if len(r)>0:
-        return r[random.randint(0,len(r)-1)]
-    else:
-        return -1
-    
 
-def determineNextMoveforTraining(currentPlayer):
-    
-    global training 
-    
-    temp= random.randint(0,100)
-        
-    if temp >= 90:
-
-        return chooseNextMove(currentPlayer)
-    else:
-        
-        return chooseRandomMove()
-            
-        
 
 def initializeQValues():
     
@@ -91,11 +68,12 @@ def learn(trainingSize):
     
     currentPlayer= chooseAlternateStartPlayer()
     count = 0
+    noOfMoves=0
     while(count< trainingSize):
         
         
         showBoard(boardState)
-        nextMove= determineNextMoveforTraining(currentPlayer)
+        nextMove= determineNextMoveforTraining(currentPlayer, noOfMoves)
         
         ke= currentPlayer + ''.join(boardState) + str(nextMove)
     
@@ -138,10 +116,11 @@ def learn(trainingSize):
             initializeBoard()
             currentPlayer= chooseAlternateStartPlayer()
             count+=1
+            noOfMoves=0
         else:
             boardState[nextMove]=currentPlayer
             currentPlayer=changePlayer(currentPlayer)
-            
+            noOfMoves+=1
         
 
 def updateQTable(player, nextMove):
@@ -270,6 +249,18 @@ def showBoard(boardState):
     print(boardState[6]+boardState[7]+boardState[8])
     return 
 
+def chooseRandomMove():
+    r=[]
+    for i in range(9):
+        if boardState[i]=='-':
+            r.append(i)
+    if len(r)>0:
+        return r[random.randint(0,len(r)-1)]
+    else:
+        return -1
+               
+        
+
 def chooseNextMove(AiTag):
     
     if AiTag=='o':
@@ -313,6 +304,21 @@ def chooseNextMove(AiTag):
         else:
             return chooseRandomMove()
         
+def determineNextMoveforTraining(currentPlayer, noOfMoves):
+    global training 
+    temp= random.randint(0,100)
+    
+    if temp < 10:
+        return chooseNextMove(currentPlayer)
+    else:
+        return chooseRandomMove()
+
+
+    
+    
+#Main Code
+
+
 
 initializeBoard()
 initializeQValues()
@@ -320,7 +326,7 @@ initializeQValues()
 learn(training)
 
 #Store the learned Q values in a file
-pickle_out = open("qValuesAdv.pickle","wb")
+pickle_out = open("qValues.pickle","wb")
 pickle.dump(Q_table, pickle_out)
 pickle_out.close()
 
